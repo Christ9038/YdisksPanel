@@ -1,0 +1,31 @@
+services:
+  ydiskspanel:
+    image: ghcr.io/christ9038/ydiskspanel:latest
+    # To build locally instead of pulling:  docker compose up -d --build
+    build: .
+    container_name: ydiskspanel
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Named volume: database, secret.key, uploaded images and favicon cache live here.
+      # It is initialised with the right owner (uid 65532) automatically.
+      - ydiskspanel-data:/data
+      # Prefer a host folder? Replace the line above with "./data:/data" and run:
+      #   mkdir -p data && sudo chown 65532:65532 data
+    environment:
+      YDP_HEALTH_INTERVAL: 60s
+      # Extra CIDRs treated as LAN (defaults already cover RFC1918/loopback/ULA):
+      # YDP_LAN_CIDRS: "192.168.0.0/16,10.0.0.0/8"
+      # Set when running behind a reverse proxy so X-Forwarded-For is trusted:
+      # YDP_TRUSTED_PROXIES: "172.16.0.0/12"
+      # Direct HTTPS (mount certs and uncomment):
+      # YDP_TLS_CERT: /certs/fullchain.pem
+      # YDP_TLS_KEY: /certs/privkey.pem
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  ydiskspanel-data:
